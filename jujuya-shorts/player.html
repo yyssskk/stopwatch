@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>아 줴줴이야 — 플레이어</title>
+    <style>
+      :root {
+        --bg: #0f1120;
+        --panel: #1b1f36;
+        --ink: #f4f1ff;
+        --muted: #9aa0c3;
+        --accent: #ffe14d;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; background: var(--bg); color: var(--ink); font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
+      #stage { position: relative; overflow: hidden; border-radius: 14px; background: #000; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+      #stage iframe { position: absolute; top: 0; left: 0; width: 1080px; height: 1920px; border: 0; transform-origin: 0 0; pointer-events: none; }
+      #overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10, 10, 25, 0.55); cursor: pointer; font-size: 18px; text-align: center; padding: 20px; }
+      #overlay .big { display: block; font-size: 64px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+      #overlay[hidden] { display: none; }
+      #controls { display: flex; align-items: center; gap: 12px; background: var(--panel); padding: 10px 14px; border-radius: 999px; }
+      #toggle { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--accent); color: #1b1f36; font-size: 16px; cursor: pointer; }
+      #toggle:disabled { opacity: 0.4; cursor: default; }
+      #seek { accent-color: var(--accent); }
+      #time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; min-width: 92px; text-align: right; }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <iframe id="film" src="index.html" title="아 줴줴이야 쇼츠"></iframe>
+      <div id="overlay"><span><span class="big">▶</span><span id="status">불러오는 중…</span></span></div>
+    </div>
+    <div id="controls">
+      <button id="toggle" aria-label="재생" disabled>▶</button>
+      <input id="seek" type="range" min="0" max="30" step="0.01" value="0" aria-label="재생 위치" />
+      <span id="time">0:00 / 0:30</span>
+    </div>
+
+    <script type="module">
+      // Plays the composition live: the music is synthesized in the browser and the
+      // composition's paused GSAP timeline is seeked to the audio clock every frame.
+      import { synthesize } from "./tools/synth.js";
+
+      const DUR = 30;
+      const film = document.getElementById("film");
+      const stage = document.getElementById("stage");
+      const overlay = document.getElementById("overlay");
+      const status = document.getElementById("status");
+      const toggle = document.getElementById("toggle");
+      const seek = document.getElementById("seek");
+      const timeLabel = document.getElementById("time");
+
+      let tl, win, buffer, ctx, source;
+      let playing = false, offset = 0, startedAt = 0;
+
+      function fit() {
+        const h = Math.min(innerHeight - 110, (innerWidth - 32) * (16 / 9));
+        const s = h / 1920;
+        stage.style.width = `${1080 * s}px`;
+        stage.style.height = `${h}px`;
+        film.style.transform = `scale(${s})`;
+        seek.style.width = `${Math.max(140, 1080 * s - 150)}px`;
+      }
+      addEventListener("resize", fit);
+      fit();
+
+      const fmt = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+      const now = () => (playing ? ctx.currentTime - startedAt : offset);
+
+      function show(t) {
+        const ft = Math.min(t, DUR - 1 / 30);
+        tl.seek(ft);
+        // seek() suppresses the canvas tween's onUpdate; the composition redraws on hf-seek
+        win.dispatchEvent(new win.CustomEvent("hf-seek", { detail: { time: ft } }));
+        seek.value = t;
+        timeLabel.textContent = `${fmt(t)} / ${fmt(DUR)}`;
+      }
+
+      function startAudio(at) {
+        source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0, at);
+        startedAt = ctx.currentTime - at;
+      }
+
+      function stopAudio() {
+        if (source) { source.onended = null; source.stop(); source = null; }
+      }
+
+      function frame() {
+        if (!playing) return;
+        const t = now();
+        if (t >= DUR) { pause(); offset = 0; overlay.hidden = false; status.textContent = "다시 보기"; return; }
+        show(t);
+        requestAnimationFrame(frame);
+      }
+
+      async function play() {
+        if (!ctx) {
+          ctx = new AudioContext({ sampleRate: buffer.sampleRate });
+        }
+        await ctx.resume();
+        audioBuffer();
+        playing = true;
+        startAudio(offset);
+        overlay.hidden = true;
+        toggle.textContent = "❚❚";
+        toggle.setAttribute("aria-label", "일시정지");
+        requestAnimationFrame(frame);
+      }
+
+      function pause() {
+        offset = now();
+        playing = false;
+        stopAudio();
+        toggle.textContent = "▶";
+        toggle.setAttribute("aria-label", "재생");
+      }
+
+      // Raw Float32 channels -> AudioBuffer, built once the AudioContext exists
+      let raw;
+      function audioBuffer() {
+        if (buffer instanceof AudioBuffer) return;
+        const b = ctx.createBuffer(2, raw.left.length, raw.sampleRate);
+        b.copyToChannel(raw.left, 0);
+        b.copyToChannel(raw.right, 1);
+        buffer = b;
+      }
+
+      toggle.addEventListener("click", () => (playing ? pause() : play()));
+      overlay.addEventListener("click", () => { if (!toggle.disabled) play(); });
+      addEventListener("keydown", (e) => {
+        if (e.code === "Space" && !toggle.disabled) { e.preventDefault(); playing ? pause() : play(); }
+      });
+      seek.addEventListener("input", () => {
+        const t = parseFloat(seek.value);
+        if (playing) { stopAudio(); startAudio(t); } else { offset = t; }
+        show(t);
+      });
+
+      // 1. wait for the composition to register its timeline (and its font)
+      await new Promise((r) => (film.contentDocument?.readyState === "complete" ? r() : film.addEventListener("load", r, { once: true })));
+      win = film.contentWindow;
+      await (win.__hf?.buildReady?.font || Promise.resolve());
+      tl = win.__timelines.main;
+      show(0);
+
+      // 2. synthesize the music (a couple of seconds); yield first so the status paints
+      status.textContent = "트럼펫 비트 만드는 중…";
+      await new Promise((r) => setTimeout(r, 50));
+      raw = synthesize();
+      buffer = { sampleRate: raw.sampleRate };
+
+      status.textContent = "눌러서 재생 (소리 켜기)";
+      toggle.disabled = false;
+    </script>
+  </body>
+</html>

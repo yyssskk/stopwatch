@@ -7,7 +7,7 @@
     <style>
       @font-face {
         font-family: "JUJU";
-        src: url("assets/fonts/malgunbd.ttf");
+        src: url("assets/fonts/malgunbd.ttf"), local("Malgun Gothic Bold"), local("MalgunGothicBold");
         font-weight: 700;
       }
       :root {
@@ -162,7 +162,7 @@
         oc.translate(T.x / CELL, T.y / CELL);
         oc.rotate(T.rot);
         oc.scale(T.sx, T.sx);
-        oc.font = `700 ${c.size / CELL}px JUJU`;
+        oc.font = `700 ${c.size / CELL}px JUJU, "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif`;
         oc.textAlign = "center"; oc.textBaseline = "middle";
         oc.fillStyle = c.color;
         oc.fillText(cueText(c, t), 0, 0);
@@ -232,7 +232,7 @@
       window.addEventListener("hf-seek", (e) => draw(e.detail.time));
       window.__hf = window.__hf || {};
       window.__hf.buildReady = window.__hf.buildReady || {};
-      window.__hf.buildReady.font = document.fonts.load("700 60px JUJU").then(() => draw(tl.time()));
+      window.__hf.buildReady.font = document.fonts.load("700 60px JUJU").catch(() => {}).then(() => draw(tl.time()));
       tl.seek(0);
     </script>
   </body>
