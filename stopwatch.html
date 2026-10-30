@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영원의 시계 - 스탑워치</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --lapis: #1b2a5c;
+    --lapis-deep: #0c1433;
+    --gold: #d4a73a;
+    --gold-light: #f6dc85;
+    --gold-dark: #8a6a1c;
+    --sand: #f2e4ba;
+    --sand-dark: #d8c08a;
+    --ink: #3a2814;
+    --ink-soft: #5a4310;
+    --carnelian: #b3321f;
+    --carnelian-dark: #7c1f12;
+    --turquoise: #14706b;
+    --turquoise-dark: #0d4f4b;
+    --serif: "Cinzel", "Trajan Pro", "Noto Serif KR", "Nanum Myeongjo", "Batang", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html { scrollbar-color: var(--gold-dark) var(--lapis-deep); }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-variant-numeric: lining-nums tabular-nums;
+    /* 신전 천장: 남색 바탕에 금색 다섯 꼭지 별 */
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(246,220,133,0.16), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='%23d4a73a' fill-opacity='0.5'%3E%3Cpolygon transform='translate(12 12)' points='0,-3.6 0.85,-1.2 3.4,-1.1 1.4,0.45 2.1,2.9 0,1.45 -2.1,2.9 -1.4,0.45 -3.4,-1.1 -0.85,-1.2'/%3E%3Cpolygon transform='translate(36 36)' points='0,-3.6 0.85,-1.2 3.4,-1.1 1.4,0.45 2.1,2.9 0,1.45 -2.1,2.9 -1.4,0.45 -3.4,-1.1 -0.85,-1.2'/%3E%3C/g%3E%3C/svg%3E"),
+      linear-gradient(180deg, var(--lapis-deep), var(--lapis));
+  }
+  .card {
+    width: 100%;
+    max-width: 440px;
+    padding: 12px 20px 16px;
+    border-radius: 4px;
+    border: 2px solid var(--gold-dark);
+    background:
+      repeating-linear-gradient(0deg, rgba(138,106,28,0.05) 0 1px, transparent 1px 5px),
+      linear-gradient(180deg, #f7ecc8, var(--sand) 55%, #e9d5a0);
+    box-shadow:
+      0 0 0 2px var(--lapis-deep),
+      0 0 0 4px var(--gold),
+      0 24px 50px rgba(0,0,0,0.55);
+  }
+
+  .sun { display: block; width: 156px; height: 36px; margin: 0 auto; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .head { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .title { text-align: center; }
+  .title h1 {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.2;
+    color: var(--lapis);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+    white-space: nowrap;
+  }
+  .subtitle { font-size: 13px; letter-spacing: 1px; color: var(--ink-soft); }
+  .ankh { width: 18px; height: 30px; color: var(--gold-dark); }
+
+  /* 케케르 띠: 끝이 둥근 갈대 다발을 목에서 묶은 모양, 금 단색 (타일 수가 정수가 되도록 round) */
+  .frieze, .band {
+    border-top: 1.5px solid var(--gold);
+    border-bottom: 1.5px solid var(--gold);
+  }
+  /* 케케르 띠: 작은 봉오리, 짧게 두 번 묶은 목, 곧게 선 갈대 다발이 서로 맞닿아 벽처럼 이어짐. 금 단색 (타일 수가 정수가 되도록 round) */
+  .frieze {
+    height: 25px;
+    margin: 6px 0 12px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='22'%3E%3Crect width='12' height='22' fill='%231b2a5c'/%3E%3Cg fill='%23c9a037'%3E%3Ccircle cx='6' cy='2.7' r='2.1'/%3E%3Cpath d='M.6 22V9.6C.6 8.1 2.4 7.1 4.4 6.7V4.6H7.6V6.7C9.6 7.1 11.4 8.1 11.4 9.6V22Z'/%3E%3C/g%3E%3Cg fill='%231b2a5c'%3E%3Crect x='4.4' y='5' width='3.2' height='.7'/%3E%3Crect x='4.4' y='6.1' width='3.2' height='.7'/%3E%3C/g%3E%3Cpath d='M3.4 10.5V21.4M6 9.5V21.4M8.6 10.5V21.4' stroke='%23a8822a' stroke-width='.6'/%3E%3C/svg%3E")
+      0 0 / 12px 22px round;
+  }
+  /* 카드 아래 마감: 라피스 띠에 작은 태양 원반을 띄엄띄엄 */
+  .band {
+    height: 13px;
+    margin-top: 14px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10'%3E%3Crect width='28' height='10' fill='%231b2a5c'/%3E%3Ccircle cx='14' cy='5' r='3.2' fill='%23d4a73a'/%3E%3Ccircle cx='14' cy='5' r='1.6' fill='%23b3321f'/%3E%3C/svg%3E")
+      0 0 / 28px 10px round;
+  }
+
+  /* 장면 액자: 금 + 라피스 이중 테두리, 네 모서리 L자 금박, 가장자리만 살짝 어둡게 (장면 색은 그대로).
+     장식 바깥선이 띠·버튼·랩 패널의 좌우선과 맞도록 안쪽으로 들인다. */
+  .frame {
+    position: relative;
+    margin: 6px 6px 20px;
+    border: 2px solid var(--gold-dark);
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px var(--lapis);
+  }
+  .frame::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    pointer-events: none;
+    z-index: 1;
+    --c: linear-gradient(var(--gold-dark), var(--gold-dark));
+    background:
+      var(--c) left top / 18px 3px no-repeat,
+      var(--c) left top / 3px 18px no-repeat,
+      var(--c) right top / 18px 3px no-repeat,
+      var(--c) right top / 3px 18px no-repeat,
+      var(--c) left bottom / 18px 3px no-repeat,
+      var(--c) left bottom / 3px 18px no-repeat,
+      var(--c) right bottom / 18px 3px no-repeat,
+      var(--c) right bottom / 3px 18px no-repeat;
+  }
+  .frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 10px rgba(40,20,0,0.25);
+  }
+  .scene { display: block; width: 100%; height: 170px; }
+
+  .cartouche {
+    position: relative;
+    left: -5px;               /* 오른쪽 매듭만큼 왼쪽으로 옮겨 전체를 가운데에 */
+    margin: 0 auto 18px;
+    padding: 10px 34px;
+    width: fit-content;
+    max-width: 100%;
+    border-radius: 999px;
+    border: 3px solid var(--gold);
+    background: radial-gradient(ellipse at 50% 30%, #25397a, var(--lapis-deep));
+    box-shadow:
+      0 0 0 2px var(--lapis-deep),
+      0 0 0 4px var(--gold-dark),
+      inset 0 2px 10px rgba(0,0,0,0.6);
+  }
+  /* 카르투슈 끝의 매듭: 고리 끝에 붙어 타원 높이 전체를 덮는 금 가로대 (왕명을 묶는 끈) */
+  .cartouche::after {
+    content: "";
+    position: absolute;
+    right: -5px;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    border-radius: 1px;
+    border: 1px solid var(--gold-dark);
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold) 50%, var(--gold-dark));
+  }
+  .cartouche .state {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: -13px;
+    transform: translateX(-50%);
+    padding: 1px 10px;
+    border: 1px solid var(--gold-dark);
+    border-radius: 2px;
+    background: #f7ecc8;
+    color: var(--lapis-deep);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  .cartouche.paused .state { display: block; }
+  .cartouche.flash { animation: flash 1.4s ease-out; }
+  @keyframes flash {
+    0%   { box-shadow: 0 0 0 2px var(--lapis-deep), 0 0 0 4px var(--gold-light), 0 0 36px 10px rgba(246,220,133,0.95), inset 0 2px 10px rgba(0,0,0,0.6); }
+    100% { box-shadow: 0 0 0 2px var(--lapis-deep), 0 0 0 4px var(--gold-dark), 0 0 0 0 rgba(246,220,133,0), inset 0 2px 10px rgba(0,0,0,0.6); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cartouche.flash { animation: none; }
+    button { transition: none; }
+  }
+  .display {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    font-size: clamp(34px, 10.5vw, 50px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--gold-light);
+    text-shadow: 0 0 8px rgba(246,220,133,0.3), 0 2px 0 rgba(0,0,0,0.55);
+  }
+  .display .d { display: inline-block; width: 0.66em; text-align: center; }
+  .display .sep { display: inline-block; width: 0.3em; text-align: center; }
+  .display .ms { display: inline-flex; font-size: 0.5em; color: #e5bd55; }
+
+  .buttons { display: flex; gap: 14px; }
+  button {
+    position: relative;
+    flex: 1;
+    height: 52px;
+    padding: 0 0 0 4px;       /* 자간이 끝 글자 뒤에 남기는 여백 보정 */
+    border-radius: 2px;
+    border: 2px solid var(--gold-dark);
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    cursor: pointer;
+    color: #fff6dc;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
+    transition: transform 0.06s, box-shadow 0.06s;
+  }
+  /* 석판 안쪽의 가는 금색 이중선 */
+  button::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(246,220,133,0.6);
+    pointer-events: none;
+  }
+  button:active { transform: translateY(2px); }
+  button:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
+  #primary.start {
+    background: linear-gradient(180deg, #1e8f88, var(--turquoise) 55%, var(--turquoise-dark));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 0 #082f2d;
+  }
+  #primary.stop {
+    background: linear-gradient(180deg, #d9533b, var(--carnelian) 55%, var(--carnelian-dark));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 0 #4d1208;
+  }
+  #secondary {
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    background: linear-gradient(180deg, #ecd9a3, var(--sand-dark) 60%, #c4a96e);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 0 #6f5718;
+  }
+  #secondary::before { border-color: rgba(138,106,28,0.55); }
+  /* 누를 수 없는 석판: 점선 테두리, 그림자 없음 */
+  #secondary:disabled {
+    cursor: default;
+    color: #6b5326;
+    background: rgba(232,217,173,0.55);
+    border: 2px dashed #a88d4c;
+    box-shadow: none;
+    transform: none;
+  }
+  #secondary:disabled::before { display: none; }
+  #primary:active, #secondary:not(:disabled):active { box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 0 rgba(0,0,0,0.5); }
+
+  /* 랩 기록: 파피루스 두루마리 (페이지 스크롤 하나로) */
+  .laps {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 4px 14px;
+    border: 1px solid var(--gold-dark);
+    border-radius: 2px;
+    background: linear-gradient(180deg, #e6d3a0, #dcc58c);
+    box-shadow: inset 0 0 0 3px rgba(242,228,186,0.7), inset 0 0 0 4px rgba(138,106,28,0.35);
+  }
+  .laps:empty { display: none; }
+  .laps li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2px 8px;
+    padding: 9px 2px;
+    color: var(--ink);
+  }
+  .laps li + li { border-top: 1px solid rgba(138,106,28,0.45); }
+  .laps .lbl { display: flex; align-items: center; gap: 6px; font-size: 13px; letter-spacing: 1px; color: var(--ink-soft); }
+  .laps .tm { display: inline-flex; font-size: 16px; font-weight: 600; }
+  .laps li[data-current] { padding: 10px 4px; background: rgba(27,42,92,0.07); }
+  .laps li[data-current] .tm { font-size: 18px; font-weight: 700; }
+  .laps .tm .d { display: inline-block; width: 0.64em; text-align: center; }
+  .laps .tm .sep { display: inline-block; width: 0.3em; text-align: center; }
+  .laps .lbl::after {
+    font-size: 12px;
+    letter-spacing: 0;
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .laps li[data-current] .tm { color: var(--lapis); }
+  .laps li[data-current] .lbl::after { content: "진행 중"; color: #fff6dc; background: var(--lapis); }
+  /* 접힌 쪽의 최고/최저 기록 요약: 목록과 구분되는 금선 위 작은 줄 */
+  .laps li.summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    border-top: 1px solid var(--gold-dark);
+  }
+  .laps .sum-lbl { font-size: 12px; letter-spacing: 2px; color: var(--ink-soft); }
+  /* 요약 항목도 목록 줄과 같은 문법: 왼쪽 배지 + 랩 번호, 오른쪽 시간 열 */
+  .laps .sum-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .laps .lbl, .laps .tm, .laps .lbl b { white-space: nowrap; }
+  .laps .sum-item b { font-size: 12px; font-weight: 700; letter-spacing: 0; padding: 1px 6px; border-radius: 2px; color: #fff6dc; }
+  .laps .sum-item .lbl::after { content: none; }
+  .laps .sum-item.best b { background: var(--turquoise-dark); }
+  .laps .sum-item.best .tm { color: var(--turquoise-dark); }
+  .laps .sum-item.worst b { background: var(--carnelian-dark); }
+  .laps .sum-item.worst .tm { color: var(--carnelian-dark); }
+  .laps li.more { justify-content: center; }
+  .laps li.more button {
+    flex: none;
+    height: auto;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--ink-soft);
+    text-shadow: none;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .laps li.more button::before { display: none; }
+  .laps li.best .tm { color: var(--turquoise-dark); }
+  .laps li.best .lbl::after { content: "가장 빠름"; color: #fff6dc; background: var(--turquoise-dark); }
+  .laps li.worst .tm { color: var(--carnelian-dark); }
+  .laps li.worst .lbl::after { content: "가장 느림"; color: #fff6dc; background: var(--carnelian-dark); }
+
+  .hint {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--ink-soft);
+  }
+  /* 단축키는 '키 + 설명' 묶음 단위로만 줄바꿈 */
+  .hint .key { display: inline-block; margin: 2px 7px; white-space: nowrap; }
+  /* 터치 기기에서는 단축키 안내를 숨김. 키 입력이 한 번이라도 있으면(키보드 연결) 다시 보여 줌 */
+  @media (hover: none) and (pointer: coarse) { body:not(.kbd) .hint { display: none; } }
+
+  /* 아주 좁은 화면: 카르투슈를 컬럼 안에 두고, 액자 모서리 장식을 걷어 폭을 맞춘다 */
+  @media (max-width: 340px) {
+    .card { padding-left: 14px; padding-right: 14px; }
+    .cartouche { left: -4px; padding: 8px 20px; max-width: calc(100% - 10px); }
+    .display { font-size: clamp(28px, 10vw, 34px); }
+    .frame { margin-left: 0; margin-right: 0; }
+    .frame::before { display: none; }
+  }
+  kbd {
+    display: inline-block;
+    min-width: 22px;
+    padding: 1px 6px;
+    margin: 0 2px;
+    border: 1px solid var(--gold-dark);
+    border-radius: 2px;
+    background: #f7ecc8;
+    font-family: var(--serif);
+    font-size: 12px;
+    color: var(--ink);
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="sun" viewBox="0 6 200 48" aria-hidden="true">
+      <g id="wing"></g>
+      <use href="#wing" transform="translate(200 0) scale(-1 1)"/>
+      <circle cx="100" cy="27" r="11" fill="#b3321f" stroke="#8a6a1c" stroke-width="2"/>
+      <circle cx="100" cy="27" r="5" fill="#f6dc85"/>
+    </svg>
+    <div class="head">
+      <svg class="ankh" viewBox="0 0 24 40" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M12 1C17 1 19.5 6 18 10.5C16.8 14 14 17 12 18.5C10 17 7.2 14 6 10.5C4.5 6 7 1 12 1ZM12 4.6C9.6 4.6 8.6 7.5 9.4 10C10 12 11 13.6 12 14.6C13 13.6 14 12 14.6 10C15.4 7.5 14.4 4.6 12 4.6Z"/><path d="M1.5 17.4L4 18.4H20L22.5 17.4V23.6L20 22.6H4L1.5 23.6Z"/><path d="M10 22.4H14L15.8 39H8.2Z"/></svg>
+      <div class="title">
+        <h1>영원의 시계</h1>
+        <div class="subtitle">1분에 피라미드 하나</div>
+      </div>
+      <svg class="ankh" viewBox="0 0 24 40" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M12 1C17 1 19.5 6 18 10.5C16.8 14 14 17 12 18.5C10 17 7.2 14 6 10.5C4.5 6 7 1 12 1ZM12 4.6C9.6 4.6 8.6 7.5 9.4 10C10 12 11 13.6 12 14.6C13 13.6 14 12 14.6 10C15.4 7.5 14.4 4.6 12 4.6Z"/><path d="M1.5 17.4L4 18.4H20L22.5 17.4V23.6L20 22.6H4L1.5 23.6Z"/><path d="M10 22.4H14L15.8 39H8.2Z"/></svg>
+    </div>
+
+    <div class="frieze" aria-hidden="true"></div>
+
+    <div class="frame"><canvas class="scene" id="scene" role="img" aria-label="피라미드 건설 장면: 2초마다 블록 하나, 1분마다 피라미드 하나가 완성됩니다"></canvas></div>
+
+    <div class="cartouche" id="cartouche">
+      <span class="state">멈춤</span>
+      <div class="display" id="display" aria-hidden="true"></div>
+    </div>
+    <span class="sr" id="srTime" role="status" aria-live="polite"></span>
+
+    <div class="buttons">
+      <button id="secondary" disabled>랩</button>
+      <button id="primary" class="start">시작</button>
+    </div>
+    <ul class="laps" id="laps"></ul>
+    <div class="hint"><span class="key"><kbd>Space</kbd> 시작/정지</span><span class="key"><kbd>L</kbd> 랩</span><span class="key"><kbd>R</kbd> 리셋</span></div>
+    <div class="band" aria-hidden="true"></div>
+  </div>
+
+<script>
+  const display = document.getElementById('display');
+  const primary = document.getElementById('primary');
+  const secondary = document.getElementById('secondary');
+  const lapList = document.getElementById('laps');
+  const cartouche = document.getElementById('cartouche');
+  const srTime = document.getElementById('srTime');
+  const LAPS_SHOWN = 8;
+  let showAllLaps = false;
+
+  // 날개 달린 태양: 깃털 층마다 끝이 물결 모양인 날개를 그린다
+  (function buildWing() {
+    const tiers = [
+      { L: 84, y: 20, h: 9, fill: '#1b2a5c' },
+      { L: 70, y: 25, h: 8, fill: '#14706b' },
+      { L: 56, y: 30, h: 7, fill: '#d4a73a' },
+      { L: 42, y: 35, h: 5, fill: '#b3321f' },
+    ];
+    const NS = 'http://www.w3.org/2000/svg';
+    const g = document.getElementById('wing');
+    tiers.forEach(({ L, y, h, fill }) => {
+      const x0 = 88, xe = x0 - L, n = Math.round(L / 9), yb = y + h;
+      let d = `M${x0} ${y} C${x0 - L * 0.4} ${y - 7}, ${xe + L * 0.25} ${y - 6}, ${xe} ${y + 2} L${xe} ${yb}`;
+      for (let i = 0; i < n; i++) {
+        const cx = xe + (i + 0.5) * L / n, x1 = xe + (i + 1) * L / n;
+        d += ` Q${cx} ${yb + 4} ${x1} ${yb}`;
+      }
+      d += ' Z';
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', d);
+      p.setAttribute('fill', fill);
+      p.setAttribute('stroke', '#8a6a1c');
+      p.setAttribute('stroke-width', '1');
+      g.appendChild(p);
+    });
+  })();
+
+  let running = false;
+  let startTime = 0;     // 현재 구간 시작 시각
+  let elapsed = 0;       // 정지 시점까지 누적된 시간(ms)
+  let lapStart = 0;      // 현재 랩이 시작된 누적 시간
+  let laps = [];
+  let rafId = null;
+
+  function now() {
+    return running ? elapsed + (performance.now() - startTime) : elapsed;
+  }
+
+  function format(ms) {
+    const totalCs = Math.floor(ms / 10);
+    const cs = totalCs % 100;
+    const totalSec = Math.floor(totalCs / 100);
+    const s = totalSec % 60;
+    const totalMin = Math.floor(totalSec / 60);
+    const m = totalMin % 60;
+    const h = Math.floor(totalMin / 60);
+    const pad = n => String(n).padStart(2, '0');
+    const main = (h > 0 ? h + ':' : '') + pad(m) + ':' + pad(s);
+    return { main, cs: '.' + pad(cs) };
+  }
+
+  // ---- 피라미드 건설 장면 (경과 시간으로 구동되므로 정지하면 같이 멈춤) ----
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const ROW_WIDTHS = [10, 8, 6, 4, 2];  // 아래층부터 블록 수, 합계 30개
+  const TOTAL = 30;
+  const BLOCK_MS = 2000;                // 2초에 블록 1개
+  const MINUTE = TOTAL * BLOCK_MS;      // 피라미드 1개 = 1분
+  const MOVE_MS = 1000;                 // 완성된 피라미드가 배경으로 물러나는 시간
+  const BG_PER_ROW = 8;                 // 배경 한 줄에 놓이는 피라미드 수
+  let W = 0, H = 0;
+
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawScene(now());
+  }
+
+  const ease = q => q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
+
+  function drawBlock(x, y, b, gold) {
+    ctx.fillStyle = gold ? '#f2c94c' : '#d9b56a';
+    ctx.strokeStyle = gold ? '#b8902a' : '#a9853f';
+    ctx.lineWidth = 1;
+    ctx.fillRect(x, y, b, b);
+    ctx.strokeRect(x + 0.5, y + 0.5, b - 1, b - 1);
+  }
+
+  function drawWorker(x, groundY, step, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#5a3a22';
+    ctx.fillStyle = '#5a3a22';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    const hipX = x - 3, hipY = groundY - 12;
+    const shX = x + 1, shY = groundY - 22;
+    // 다리
+    ctx.beginPath();
+    ctx.moveTo(hipX, hipY); ctx.lineTo(hipX + step, groundY);
+    ctx.moveTo(hipX, hipY); ctx.lineTo(hipX - step, groundY);
+    // 몸통 (앞으로 기울여 끄는 자세)
+    ctx.moveTo(hipX, hipY); ctx.lineTo(shX, shY);
+    // 팔 (뒤쪽 밧줄을 잡음)
+    ctx.moveTo(shX, shY); ctx.lineTo(x - 6, groundY - 16);
+    ctx.stroke();
+    // 머리
+    ctx.beginPath();
+    ctx.arc(x + 3, groundY - 26, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    // 허리천
+    ctx.fillStyle = '#f5f0e1';
+    ctx.fillRect(hipX - 3, hipY - 1, 6, 4);
+    ctx.restore();
+  }
+
+  function pyramidSlot(n, cx, baseY, b) {
+    let r = 0, rem = n;
+    while (rem >= ROW_WIDTHS[r]) { rem -= ROW_WIDTHS[r]; r++; }
+    return { x: cx - ROW_WIDTHS[r] * b / 2 + rem * b, y: baseY - (r + 1) * b };
+  }
+
+  // 완성된 블록 피라미드 (꼭대기 층은 금색)
+  function drawFullPyramid(cx, baseY, b) {
+    for (let i = 0; i < TOTAL; i++) {
+      const s = pyramidSlot(i, cx, baseY, b);
+      drawBlock(s.x, s.y, b, i >= TOTAL - ROW_WIDTHS[ROW_WIDTHS.length - 1]);
+    }
+  }
+
+  // 배경용 실루엣 피라미드 (멀수록 흐리게)
+  function drawFarPyramid(cx, baseY, b, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ROW_WIDTHS.forEach((n, r) => {
+      const w = n * b, x = cx - w / 2, y = baseY - (r + 1) * b;
+      ctx.fillStyle = '#d2a85e';
+      ctx.fillRect(x, y, w, b);
+      ctx.fillStyle = '#b8894a';
+      ctx.fillRect(cx, y, w / 2, b);  // 오른쪽 그늘
+    });
+    ctx.restore();
+  }
+
+  // i번째로 완성된 피라미드의 배경 자리
+  function bgSlot(i, fgB, horizonY) {
+    const layer = Math.floor(i / BG_PER_ROW);
+    const j = (i % BG_PER_ROW) * 3 % BG_PER_ROW;  // 좌우로 고르게 흩어지도록
+    const jitter = ((i * 37) % 11 - 5);
+    return {
+      x: W * 0.1 + W * 0.8 * j / (BG_PER_ROW - 1) + jitter,
+      baseY: horizonY + Math.max(0, 14 - layer * 5),
+      b: fgB * Math.max(0.15, 0.4 - layer * 0.07),
+      alpha: Math.max(0.3, 0.9 - layer * 0.18),
+      layer,
+    };
+  }
+
+  function drawScene(t) {
+    if (!W) return;
+    const b = Math.floor(Math.min(16, W * 0.5 / ROW_WIDTHS[0]));
+    const horizonY = Math.round(H * 0.6);
+    const groundY = H - 22;
+    const cx = W * 0.68;
+    const left = cx - ROW_WIDTHS[0] * b / 2;
+    const done = Math.floor(t / MINUTE);  // 완성된 피라미드 = 경과 분
+    const ct = t % MINUTE;
+    const k = Math.floor(ct / BLOCK_MS);
+    const p = (ct % BLOCK_MS) / BLOCK_MS;
+    const moving = done > 0 && ct < MOVE_MS ? done - 1 : -1;
+
+    // 하늘과 태양 (1분 동안 동쪽에서 서쪽으로)
+    const sky = ctx.createLinearGradient(0, 0, 0, horizonY);
+    sky.addColorStop(0, '#8ec9ef');
+    sky.addColorStop(1, '#f7dfa8');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, horizonY);
+    const f = ct / MINUTE;
+    ctx.fillStyle = '#fff3b0';
+    ctx.beginPath();
+    ctx.arc(W * 0.06 + W * 0.88 * f, horizonY - Math.sin(Math.PI * f) * (horizonY - 22), 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 모래
+    const sand = ctx.createLinearGradient(0, horizonY, 0, H);
+    sand.addColorStop(0, '#ecd08f');
+    sand.addColorStop(1, '#ddb76b');
+    ctx.fillStyle = sand;
+    ctx.fillRect(0, horizonY, W, H - horizonY);
+
+    // 배경의 완성된 피라미드들 (먼 줄부터)
+    const bg = [];
+    for (let i = 0; i < done; i++) if (i !== moving) bg.push(bgSlot(i, b, horizonY));
+    bg.sort((a, c) => c.layer - a.layer);
+    bg.forEach(s => drawFarPyramid(s.x, s.baseY, s.b, s.alpha));
+
+    // 방금 완성된 피라미드가 배경 자리로 물러남
+    if (moving >= 0) {
+      const q = ease(ct / MOVE_MS);
+      const s = bgSlot(moving, b, horizonY);
+      const mx = cx + (s.x - cx) * q;
+      const my = groundY + (s.baseY - groundY) * q;
+      const mb = b + (s.b - b) * q;
+      if (q < 0.6) drawFullPyramid(mx, my, mb);
+      else drawFarPyramid(mx, my, mb, s.alpha);
+    }
+
+    // 지금 쌓고 있는 피라미드
+    for (let i = 0; i < k; i++) {
+      const s = pyramidSlot(i, cx, groundY, b);
+      drawBlock(s.x, s.y, b, i >= TOTAL - 2);
+    }
+
+    {
+      const slot = n => pyramidSlot(n, cx, groundY, b);
+      const startX = -90;
+      const endX = left - b - 56;
+      let sledX = endX, alpha = 1, step = 0;
+      let bx, by;
+      if (p < 0.55) {
+        sledX = startX + (endX - startX) * ease(p / 0.55);
+        step = Math.sin(t * 0.025) * 5;
+        bx = sledX + 3; by = groundY - 5 - b;
+      } else if (p < 0.85) {
+        const q = ease((p - 0.55) / 0.3);
+        const s = slot(k);
+        const x0 = endX + 3, y0 = groundY - 5 - b;
+        const mx = (x0 + s.x) / 2, my = Math.min(y0, s.y) - 40;
+        bx = (1 - q) * (1 - q) * x0 + 2 * (1 - q) * q * mx + q * q * s.x;
+        by = (1 - q) * (1 - q) * y0 + 2 * (1 - q) * q * my + q * q * s.y;
+      } else {
+        const s = slot(k);
+        bx = s.x; by = s.y;
+        alpha = 1 - (p - 0.85) / 0.15;
+      }
+
+      // 썰매와 밧줄, 끄는 일꾼들
+      const w1 = sledX + b + 24, w2 = sledX + b + 42;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#7a5230';
+      ctx.fillRect(sledX, groundY - 5, b + 6, 4);
+      ctx.strokeStyle = '#8b6b3e';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sledX + b + 6, groundY - 4);
+      ctx.lineTo(w1 - 6, groundY - 16);
+      ctx.lineTo(w2 - 6, groundY - 16);
+      ctx.stroke();
+      ctx.restore();
+      drawWorker(w1, groundY, step, alpha);
+      drawWorker(w2, groundY, -step, alpha);
+
+      drawBlock(bx, by, b, k >= TOTAL - 2);
+    }
+
+    // 진행 상황
+    ctx.fillStyle = 'rgba(40, 25, 10, 0.9)';
+    ctx.font = '700 12px Cinzel, "Noto Serif KR", serif';
+    ctx.textBaseline = 'top';
+    const doneLabel = done > 0 ? ` · 완성 ${done}개` : '';
+    ctx.fillText(t === 0 ? '시작을 누르면 건설이 시작됩니다' : `블록 ${k}/${TOTAL}${doneLabel}`, 10, 10);
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  // 자릿수마다 고정 폭 칸에 넣어 숫자가 바뀌어도 흔들리지 않게 함
+  function digits(s) {
+    return s.replace(/./g, c => /\d/.test(c) ? `<span class="d">${c}</span>` : `<span class="sep">${c}</span>`);
+  }
+
+  let lastDone = 0;
+  function render() {
+    drawScene(now());
+    // 피라미드가 완성되는 순간 카르투슈가 금빛으로 번쩍임
+    const doneNow = Math.floor(now() / MINUTE);
+    if (running && doneNow > lastDone) {
+      cartouche.classList.remove('flash');
+      void cartouche.offsetWidth;
+      cartouche.classList.add('flash');
+    }
+    lastDone = doneNow;
+    const t = format(now());
+    display.innerHTML = digits(t.main) + '<span class="ms">' + digits(t.cs) + '</span>';
+    if (running && lapList.firstChild && lapList.firstChild.dataset.current) {
+      const lt = format(now() - lapStart);
+      lapList.firstChild.lastChild.innerHTML = digits(lt.main + lt.cs);
+    }
+  }
+
+  function tick() {
+    render();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function renderLaps() {
+    lapList.innerHTML = '';
+    const current = now() - lapStart;
+    if (running || elapsed > 0) {
+      lapList.appendChild(makeLap(laps.length + 1, current, true));
+    }
+    let min = -1, max = -1;
+    if (laps.length >= 2) {
+      min = laps.indexOf(Math.min(...laps));
+      max = laps.indexOf(Math.max(...laps));
+      if (laps[min] === laps[max]) min = max = -1;  // 모두 같으면 표시하지 않음
+    }
+    const addLap = i => {
+      const li = makeLap(i + 1, laps[i], false);
+      if (i === min) li.classList.add('best');
+      if (i === max) li.classList.add('worst');
+      lapList.appendChild(li);
+    };
+    // 랩이 많으면 최근 것만 보여 주고 나머지는 접는다.
+    // 접힌 쪽에 가장 빠른/느린 랩이 있으면 목록 순서를 흐트리지 않도록 요약 줄로 알린다.
+    const foldable = laps.length > LAPS_SHOWN;
+    const stop = foldable && !showAllLaps ? laps.length - LAPS_SHOWN : 0;
+    for (let i = laps.length - 1; i >= stop; i--) addLap(i);
+    const folded = [[min, 'best', '가장 빠름'], [max, 'worst', '가장 느림']].filter(([i]) => i >= 0 && i < stop);
+    if (folded.length) {
+      const li = document.createElement('li');
+      li.className = 'summary';
+      li.innerHTML = '<span class="sum-lbl">접힌 기록</span>' + folded.map(([i, cls, name]) => {
+        const t = format(laps[i]);
+        return `<div class="sum-item ${cls}"><span class="lbl"><b>${name}</b>랩 ${i + 1}</span><span class="tm">${digits(t.main + t.cs)}</span></div>`;
+      }).join('');
+      lapList.appendChild(li);
+    }
+    if (foldable) {
+      const li = document.createElement('li');
+      li.className = 'more';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = showAllLaps ? '접기' : `이전 랩 ${stop}개 더 보기`;
+      btn.setAttribute('aria-expanded', String(showAllLaps));
+      btn.addEventListener('mousedown', e => e.preventDefault());
+      btn.addEventListener('click', () => {
+        showAllLaps = !showAllLaps;
+        renderLaps();
+        lapList.querySelector('li.more button').focus();  // 다시 그려도 포커스를 잃지 않게
+      });
+      li.appendChild(btn);
+      lapList.appendChild(li);
+    }
+  }
+
+  // 스크린리더가 자연스럽게 읽도록 '1분 8초 20' 꼴로
+  function spoken(ms) {
+    const cs = Math.floor(ms / 10) % 100, sec = Math.floor(ms / 1000);
+    const m = Math.floor(sec / 60);
+    return `${m > 0 ? m + '분 ' : ''}${sec % 60}초 ${String(cs).padStart(2, '0')}`;
+  }
+
+  function makeLap(n, ms, isCurrent) {
+    const li = document.createElement('li');
+    if (isCurrent) li.dataset.current = '1';
+    const t = format(ms);
+    li.innerHTML = `<span class="lbl">랩 ${n}</span><span class="tm">${digits(t.main + t.cs)}</span>`;
+    return li;
+  }
+
+  function updateButtons() {
+    primary.textContent = running ? '정지' : '시작';
+    primary.className = running ? 'stop' : 'start';
+    secondary.textContent = running ? '랩' : '리셋';
+    secondary.disabled = !running && elapsed === 0;
+    cartouche.classList.toggle('paused', !running && elapsed > 0);
+    // 스크린리더용: 멈췄을 때 읽기 쉬운 문장으로 알림
+    if (!running && elapsed > 0) {
+      srTime.textContent = `${spoken(elapsed)}에서 멈춤`;
+    } else {
+      srTime.textContent = running ? '진행 중' : '';
+    }
+  }
+
+  function toggle() {
+    if (running) {
+      elapsed = now();
+      running = false;
+      cancelAnimationFrame(rafId);
+      render();
+    } else {
+      startTime = performance.now();
+      running = true;
+      if (!lapList.firstChild) renderLaps();
+      tick();
+    }
+    updateButtons();
+  }
+
+  function lap() {
+    if (!running) return;
+    const t = now();
+    laps.push(t - lapStart);
+    lapStart = t;
+    renderLaps();
+    srTime.textContent = `랩 ${laps.length} 기록, ${spoken(laps[laps.length - 1])}`;
+  }
+
+  function reset() {
+    if (running) return;
+    elapsed = 0;
+    lapStart = 0;
+    laps = [];
+    showAllLaps = false;
+    lapList.innerHTML = '';
+    render();
+    updateButtons();
+  }
+
+  primary.addEventListener('click', toggle);
+  secondary.addEventListener('click', () => running ? lap() : reset());
+  // 마우스로 누른 버튼에는 포커스를 남기지 않는다. 그래야 이어서 누른 Space가 그 버튼이 아니라 시작/정지가 된다.
+  [primary, secondary].forEach(b => b.addEventListener('mousedown', e => e.preventDefault()));
+
+  document.addEventListener('keydown', e => {
+    if (e.repeat) return;                                       // 길게 눌러도 한 번만
+    document.body.classList.add('kbd');                         // 키보드가 있으면 터치 기기에서도 단축키 안내를 보여 줌
+    if (e.ctrlKey || e.metaKey || e.altKey) return;            // 브라우저 단축키(Ctrl+R 등)와 충돌 방지
+    if (e.code === 'Space') {
+      if (e.target.closest('button')) return;                   // 키보드로 포커스한 버튼은 기본 동작(그 버튼 누르기)
+      e.preventDefault();
+      toggle();
+    }
+    else if (e.code === 'KeyL') lap();                          // e.code라 한글 입력 상태에서도 동작
+    else if (e.code === 'KeyR') reset();
+  });
+
+  resizeCanvas();
+  render();
+  document.fonts.ready.then(() => drawScene(now()));            // 웹폰트가 늦게 오면 장면 라벨을 다시 그림
+</script>
+</body>
+</html>
